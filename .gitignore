@@ -1,0 +1,5 @@
+.DS_Store
+.vercel
+.tmp-icons
+.tmp-renders
+*.zip

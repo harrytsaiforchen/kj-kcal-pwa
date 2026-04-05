@@ -1,0 +1,39 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="132" fill="url(#bg)"/>
+  <rect x="42" y="42" width="428" height="428" rx="108" stroke="rgba(255,255,255,0.26)" stroke-width="2"/>
+  <path d="M314 -18L418 -18L198 530L94 530L314 -18Z" fill="rgba(255,255,255,0.12)"/>
+  <path d="M418 -18L470 -18L250 530L198 530L418 -18Z" fill="rgba(255,255,255,0.08)"/>
+  <rect x="90" y="96" width="332" height="320" rx="52" fill="rgba(255,250,244,0.96)"/>
+  <rect x="90" y="96" width="332" height="320" rx="52" stroke="rgba(109,62,26,0.12)" stroke-width="2"/>
+  <rect x="118" y="122" width="276" height="22" rx="11" fill="url(#band)"/>
+  <text x="138" y="176" fill="#A07057" font-size="32" font-family="Avenir Next, PingFang SC, sans-serif" letter-spacing="7">ENERGY</text>
+  <rect x="118" y="204" width="122" height="118" rx="28" fill="#FFFFFF"/>
+  <rect x="118" y="204" width="122" height="118" rx="28" stroke="rgba(20,123,119,0.14)" stroke-width="2"/>
+  <rect x="272" y="204" width="122" height="118" rx="28" fill="#FFF9F3"/>
+  <rect x="272" y="204" width="122" height="118" rx="28" stroke="rgba(255,122,24,0.16)" stroke-width="2"/>
+  <text x="140" y="242" fill="#A07057" font-size="24" font-family="Avenir Next, PingFang SC, sans-serif" letter-spacing="4">kJ</text>
+  <text x="294" y="242" fill="#A07057" font-size="24" font-family="Avenir Next, PingFang SC, sans-serif" letter-spacing="3">kcal</text>
+  <text x="138" y="292" fill="#2E190F" font-size="58" font-weight="700" font-family="Avenir Next Condensed, Avenir Next, PingFang SC, sans-serif">1000</text>
+  <text x="294" y="292" fill="#2E190F" font-size="58" font-weight="700" font-family="Avenir Next Condensed, Avenir Next, PingFang SC, sans-serif">239</text>
+  <rect x="118" y="344" width="276" height="22" rx="11" fill="#F3E0CF"/>
+  <rect x="118" y="344" width="146" height="22" rx="11" fill="url(#meter)"/>
+  <circle cx="264" cy="355" r="13" fill="#FFF7EF" stroke="#FF7A18" stroke-width="6"/>
+  <circle cx="364" cy="156" r="30" fill="#E6F6F4"/>
+  <path d="M364 132C377.255 132 388 142.745 388 156" stroke="#147B77" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="364" cy="156" r="12" fill="#147B77"/>
+  <defs>
+    <linearGradient id="bg" x1="70" y1="40" x2="430" y2="472" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF4E8"/>
+      <stop offset="0.35" stop-color="#FFDAAF"/>
+      <stop offset="1" stop-color="#FF9B46"/>
+    </linearGradient>
+    <linearGradient id="band" x1="118" y1="133" x2="394" y2="133" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DA560D"/>
+      <stop offset="1" stop-color="#FFBE57"/>
+    </linearGradient>
+    <linearGradient id="meter" x1="118" y1="355" x2="264" y2="355" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF7A18"/>
+      <stop offset="1" stop-color="#FFBE57"/>
+    </linearGradient>
+  </defs>
+</svg>

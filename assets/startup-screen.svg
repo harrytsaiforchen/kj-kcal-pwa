@@ -1,0 +1,72 @@
+<svg width="1290" height="2796" viewBox="0 0 1290 2796" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1290" height="2796" fill="url(#bg)"/>
+  <path d="M944 -160H1112L558 2956H390L944 -160Z" fill="rgba(255,255,255,0.12)"/>
+  <path d="M1092 -160H1188L634 2956H538L1092 -160Z" fill="rgba(255,255,255,0.08)"/>
+  <g opacity="0.28">
+    <path d="M0 332H1290" stroke="white" stroke-width="2"/>
+    <path d="M0 612H1290" stroke="white" stroke-width="2"/>
+    <path d="M0 892H1290" stroke="white" stroke-width="2"/>
+    <path d="M0 1172H1290" stroke="white" stroke-width="2"/>
+    <path d="M0 1452H1290" stroke="white" stroke-width="2"/>
+    <path d="M0 1732H1290" stroke="white" stroke-width="2"/>
+    <path d="M0 2012H1290" stroke="white" stroke-width="2"/>
+    <path d="M0 2292H1290" stroke="white" stroke-width="2"/>
+    <path d="M176 0V2796" stroke="white" stroke-width="2"/>
+    <path d="M456 0V2796" stroke="white" stroke-width="2"/>
+    <path d="M736 0V2796" stroke="white" stroke-width="2"/>
+    <path d="M1016 0V2796" stroke="white" stroke-width="2"/>
+  </g>
+  <text x="146" y="344" fill="#9E6E55" font-size="54" font-family="Avenir Next, PingFang SC, sans-serif" letter-spacing="12">POCKET ENERGY TOOL</text>
+  <text x="146" y="560" fill="#2E190F" font-size="168" font-weight="700" font-family="Avenir Next Condensed, Avenir Next, PingFang SC, sans-serif">千焦 / 卡路里</text>
+  <text x="146" y="712" fill="#2E190F" font-size="168" font-weight="700" font-family="Avenir Next Condensed, Avenir Next, PingFang SC, sans-serif">自由转换</text>
+  <text x="148" y="874" fill="#694636" font-size="54" font-family="Avenir Next, PingFang SC, sans-serif">打开就算，把 kJ 迅速翻译成更直觉的 kcal。</text>
+  <g filter="url(#shadow)">
+    <rect x="148" y="1050" width="994" height="1096" rx="86" fill="rgba(255,252,247,0.92)"/>
+    <rect x="148" y="1050" width="994" height="1096" rx="86" stroke="rgba(109,62,26,0.12)" stroke-width="4"/>
+    <rect x="220" y="1118" width="850" height="36" rx="18" fill="url(#band)"/>
+    <text x="220" y="1244" fill="#A07057" font-size="46" font-family="Avenir Next, PingFang SC, sans-serif" letter-spacing="10">LIVE LABEL</text>
+    <text x="220" y="1330" fill="#2E190F" font-size="72" font-weight="600" font-family="Iowan Old Style, Songti SC, serif">像包装标签一样读数</text>
+    <rect x="220" y="1426" width="360" height="340" rx="52" fill="#FFFFFF"/>
+    <rect x="220" y="1426" width="360" height="340" rx="52" stroke="rgba(20,123,119,0.16)" stroke-width="4"/>
+    <rect x="710" y="1426" width="360" height="340" rx="52" fill="#FFF8F1"/>
+    <rect x="710" y="1426" width="360" height="340" rx="52" stroke="rgba(255,122,24,0.18)" stroke-width="4"/>
+    <text x="266" y="1534" fill="#A07057" font-size="48" font-family="Avenir Next, PingFang SC, sans-serif" letter-spacing="8">kJ</text>
+    <text x="756" y="1534" fill="#A07057" font-size="48" font-family="Avenir Next, PingFang SC, sans-serif" letter-spacing="6">kcal</text>
+    <text x="258" y="1678" fill="#2E190F" font-size="142" font-weight="700" font-family="Avenir Next Condensed, Avenir Next, PingFang SC, sans-serif">1000</text>
+    <text x="748" y="1678" fill="#2E190F" font-size="142" font-weight="700" font-family="Avenir Next Condensed, Avenir Next, PingFang SC, sans-serif">239</text>
+    <rect x="220" y="1864" width="850" height="36" rx="18" fill="#F3E0CF"/>
+    <rect x="220" y="1864" width="466" height="36" rx="18" fill="url(#meter)"/>
+    <circle cx="686" cy="1882" r="24" fill="#FFF7EF" stroke="#FF7A18" stroke-width="10"/>
+    <text x="220" y="1994" fill="#A07057" font-size="42" font-family="Avenir Next, PingFang SC, sans-serif" letter-spacing="8">ON PACK</text>
+    <text x="220" y="2078" fill="#694636" font-size="58" font-family="SFMono-Regular, Menlo, Monaco, monospace">1,000 kJ ≈ 239 kcal</text>
+    <rect x="850" y="1202" width="180" height="78" rx="39" fill="#E6F6F4"/>
+    <text x="888" y="1255" fill="#147B77" font-size="38" font-weight="700" font-family="Avenir Next, PingFang SC, sans-serif">轻食区间</text>
+  </g>
+  <text x="148" y="2408" fill="#2E190F" font-size="48" font-family="Avenir Next, PingFang SC, sans-serif" letter-spacing="8">ADD TO HOME SCREEN</text>
+  <text x="148" y="2492" fill="#694636" font-size="52" font-family="Avenir Next, PingFang SC, sans-serif">像一个口袋小工具一样，点开就能直接换算。</text>
+  <defs>
+    <linearGradient id="bg" x1="145" y1="92" x2="1128" y2="2652" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF7EF"/>
+      <stop offset="0.42" stop-color="#FFE4BF"/>
+      <stop offset="1" stop-color="#FFB566"/>
+    </linearGradient>
+    <linearGradient id="band" x1="220" y1="1136" x2="1070" y2="1136" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DA560D"/>
+      <stop offset="1" stop-color="#FFBE57"/>
+    </linearGradient>
+    <linearGradient id="meter" x1="220" y1="1882" x2="686" y2="1882" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF7A18"/>
+      <stop offset="1" stop-color="#FFBE57"/>
+    </linearGradient>
+    <filter id="shadow" x="104" y="1020" width="1082" height="1184" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="14"/>
+      <feGaussianBlur stdDeviation="22"/>
+      <feComposite in2="hardAlpha" operator="out"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.482353 0 0 0 0 0.247059 0 0 0 0 0.0745098 0 0 0 0.12 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_1"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_1" result="shape"/>
+    </filter>
+  </defs>
+</svg>

@@ -1,0 +1,33 @@
+{
+  "name": "千焦卡路里自由转换",
+  "short_name": "能量换算",
+  "description": "一个轻量的千焦 kJ 与卡路里 kcal 双向可视化转换工具，可添加到手机主屏幕。",
+  "lang": "zh-CN",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fff7ef",
+  "theme_color": "#ff7a18",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/startup-1290x2796.png",
+      "sizes": "1290x2796",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
+}

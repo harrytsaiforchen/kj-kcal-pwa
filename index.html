@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#ff7a18" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="能量换算" />
+    <meta name="apple-touch-fullscreen" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta
+      name="description"
+      content="一个可添加到 iPhone 主屏幕的千焦 kJ 与卡路里 kcal 自由转换可视化工具。"
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="apple-touch-startup-image" href="/startup-1290x2796.png" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/startup-1179x2556.png" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/startup-1170x2532.png" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/startup-1284x2778.png" media="screen and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/startup-1242x2688.png" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/startup-828x1792.png" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/startup-1125x2436.png" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/startup-750x1334.png" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/startup-640x1136.png" media="screen and (device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <title>千焦 / 卡路里自由转换</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="hero-card">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">Pocket Energy Tool</p>
+            <h1>千焦 / 卡路里自由转换</h1>
+            <p class="hero-description">
+              输入任意一边，另一边实时联动。拖动能量刻度，看清它在日常饮食里的位置，还能直接加到 iPhone 主屏幕随手打开。
+            </p>
+
+            <div class="hero-badges">
+              <span class="badge">双向输入</span>
+              <span class="badge">可视化能量尺</span>
+              <span class="badge">离线可用</span>
+              <span class="badge">主屏幕模式</span>
+            </div>
+          </div>
+
+          <aside class="hero-utility" aria-label="实时换算预览">
+            <section class="hero-ticket">
+              <div class="hero-ticket-head">
+                <div>
+                  <p class="hero-ticket-kicker">Live Label</p>
+                  <p class="hero-ticket-title">像包装标签一样读数</p>
+                </div>
+                <span class="hero-zone-pill" id="heroZonePill">轻食区间</span>
+              </div>
+
+              <div class="hero-ticket-grid">
+                <article class="hero-ticket-cell">
+                  <span class="hero-ticket-unit">kJ</span>
+                  <strong class="hero-ticket-number" id="heroKjValue">1000</strong>
+                </article>
+                <article class="hero-ticket-cell">
+                  <span class="hero-ticket-unit">kcal</span>
+                  <strong class="hero-ticket-number" id="heroKcalValue">239</strong>
+                </article>
+              </div>
+
+              <div class="hero-ticket-meta">
+                <p class="hero-ticket-caption">On Pack</p>
+                <p class="hero-ticket-line" id="heroLabelLine">1000 kJ ≈ 239 kcal</p>
+              </div>
+            </section>
+
+            <section class="hero-ruler-card">
+              <div class="hero-ruler-copy">
+                <p class="hero-ticket-kicker">Pocket Ready</p>
+                <p class="hero-ruler-title">打开就算，不需要重新想公式。</p>
+              </div>
+              <div class="hero-ruler-track" aria-hidden="true">
+                <span class="hero-ruler-fill" id="heroRulerFill"></span>
+              </div>
+              <div class="hero-ruler-scale" aria-hidden="true">
+                <span>0</span>
+                <span>轻</span>
+                <span>中</span>
+                <span>高</span>
+              </div>
+            </section>
+          </aside>
+        </div>
+
+        <section class="install-banner" id="installBanner" hidden>
+          <div>
+            <p class="install-title" id="installTitle">添加到主屏幕</p>
+            <p class="install-description" id="installDescription">
+              安装后会像一个独立小工具一样打开，进入更快，也更适合随手换算。
+            </p>
+          </div>
+          <button class="primary-button" id="installButton" type="button">立即安装</button>
+        </section>
+      </header>
+
+      <main class="content-grid">
+        <section class="panel converter-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="panel-kicker">Instant Convert</p>
+              <h2>一眼看懂能量换算</h2>
+            </div>
+            <p class="formula">1 kcal = 4.184 kJ</p>
+          </div>
+
+          <div class="converter-grid">
+            <label class="value-card value-card-kj" id="valueCardKj" for="kjInput">
+              <span class="value-label">千焦</span>
+              <div class="value-input-row">
+                <input id="kjInput" class="value-input" type="number" inputmode="decimal" min="0" step="any" />
+                <span class="value-unit">kJ</span>
+              </div>
+            </label>
+
+            <div class="equals-mark" aria-hidden="true">
+              <span>≈</span>
+            </div>
+
+            <label class="value-card value-card-kcal" id="valueCardKcal" for="kcalInput">
+              <span class="value-label">卡路里</span>
+              <div class="value-input-row">
+                <input id="kcalInput" class="value-input" type="number" inputmode="decimal" min="0" step="any" />
+                <span class="value-unit">kcal</span>
+              </div>
+            </label>
+          </div>
+
+          <div class="drag-mode" role="tablist" aria-label="拖动单位">
+            <button class="segment-button is-active" id="dragModeKj" type="button">拖动时按 kJ 调整</button>
+            <button class="segment-button" id="dragModeKcal" type="button">拖动时按 kcal 调整</button>
+          </div>
+
+          <div class="slider-wrap">
+            <div class="slider-summary">
+              <p id="sliderLabel">当前拖动单位：kJ</p>
+              <p id="sliderValue">1000 kJ</p>
+            </div>
+            <input id="energySlider" class="energy-slider" type="range" min="0" max="5000" step="10" value="1000" />
+            <div class="slider-scale" id="sliderScale" aria-hidden="true"></div>
+          </div>
+
+          <div class="quick-actions">
+            <div class="quick-actions-header">
+              <p>快捷值</p>
+              <button class="ghost-button" id="saveHistoryButton" type="button">保存到最近使用</button>
+            </div>
+            <div class="preset-grid" id="presetGrid"></div>
+          </div>
+        </section>
+
+        <section class="panel visual-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="panel-kicker">Energy Lens</p>
+              <h2>把数字变成感觉</h2>
+            </div>
+          </div>
+
+          <div class="energy-dial" id="energyDial">
+            <div class="energy-dial-core">
+              <p class="dial-caption">当前能量</p>
+              <p class="dial-primary" id="dialPrimary">239 kcal</p>
+              <p class="dial-secondary" id="dialSecondary">1000 kJ</p>
+            </div>
+          </div>
+
+          <div class="insight-strip">
+            <article class="insight-card">
+              <p class="insight-label">能量区间</p>
+              <p class="insight-value" id="zoneValue">轻盈补给</p>
+              <p class="insight-note" id="zoneNote">适合作为小零食或饮品补充。</p>
+            </article>
+            <article class="insight-card">
+              <p class="insight-label">包装读法</p>
+              <p class="insight-value" id="labelValue">1000 kJ / 239 kcal</p>
+              <p class="insight-note">这是食品包装上最常见的双单位表达方式。</p>
+            </article>
+          </div>
+
+          <div class="spectrum-card">
+            <div class="spectrum-bar" aria-hidden="true">
+              <span class="spectrum-stop warm"></span>
+              <span class="spectrum-stop bright"></span>
+              <span class="spectrum-stop punch"></span>
+              <span class="spectrum-stop deep"></span>
+            </div>
+            <div class="spectrum-legend">
+              <p>轻盈零食</p>
+              <p>轻食正餐</p>
+              <p>标准正餐</p>
+              <p>高能量补给</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel narrative-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="panel-kicker">Packaging View</p>
+              <h2>适合看食品标签时快速对照</h2>
+            </div>
+            <p class="formula">Nutrition Style</p>
+          </div>
+
+          <article class="nutrition-sheet">
+            <div class="nutrition-sheet-head">
+              <div>
+                <p class="nutrition-micro">Nutrition Facts Mode</p>
+                <h3 class="nutrition-title">把 kJ 标签翻译成你脑中更快的 kcal 直觉</h3>
+              </div>
+              <span class="nutrition-zone-badge" id="packZoneBadge">轻食区间</span>
+            </div>
+
+            <div class="nutrition-thick-rule"></div>
+
+            <div class="nutrition-primary-grid">
+              <article class="nutrition-primary-cell">
+                <span class="nutrition-caption">Energy</span>
+                <strong class="nutrition-big-value" id="sheetKjValue">1000 kJ</strong>
+                <p class="nutrition-subcopy">这是包装正面更常出现的能量写法。</p>
+              </article>
+              <article class="nutrition-primary-cell">
+                <span class="nutrition-caption">Calories</span>
+                <strong class="nutrition-big-value" id="sheetKcalValue">239 kcal</strong>
+                <p class="nutrition-subcopy">这是更适合脑内快速判断的对照值。</p>
+              </article>
+            </div>
+
+            <div class="nutrition-row">
+              <span class="nutrition-row-label">标签速读</span>
+              <strong class="nutrition-row-value" id="sheetQuickRead">轻食区间</strong>
+            </div>
+            <div class="nutrition-row">
+              <span class="nutrition-row-label">看到 kJ 时直接想成</span>
+              <strong class="nutrition-row-value" id="sheetTranslation">约 239 kcal</strong>
+            </div>
+            <div class="nutrition-row">
+              <span class="nutrition-row-label">更像哪种摄入</span>
+              <strong class="nutrition-row-value" id="sheetScenario">偏轻的一餐或补给</strong>
+            </div>
+            <div class="nutrition-row">
+              <span class="nutrition-row-label">包装对照句</span>
+              <strong class="nutrition-row-value" id="sheetLabelLine">如果包装上写着 1000 kJ</strong>
+            </div>
+
+            <p class="nutrition-footnote" id="sheetFootnote">
+              那它大约就是 239 kcal。对比时可以直接想成一份轻量零食或一杯偏高能量饮品。
+            </p>
+          </article>
+
+          <div class="comparison-grid" id="comparisonGrid"></div>
+        </section>
+
+        <section class="panel history-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="panel-kicker">Recent</p>
+              <h2>最近使用</h2>
+            </div>
+            <button class="ghost-button" id="clearHistoryButton" type="button">清空</button>
+          </div>
+
+          <div class="history-list" id="historyList"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
