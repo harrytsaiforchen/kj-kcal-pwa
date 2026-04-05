@@ -48,45 +48,100 @@
           </div>
 
           <aside class="hero-utility" aria-label="实时换算预览">
-            <section class="hero-ticket">
+            <section class="hero-ticket hero-ticket--interactive">
               <div class="hero-ticket-head">
                 <div>
-                  <p class="hero-ticket-kicker">Live Label</p>
-                  <p class="hero-ticket-title">像包装标签一样读数</p>
+                  <p class="hero-ticket-kicker">Live Label / Instant Convert</p>
+                  <p class="hero-ticket-title">像包装标签一样输入，一眼看懂能量换算</p>
                 </div>
-                <span class="hero-zone-pill" id="heroZonePill">轻食区间</span>
+                <div class="hero-ticket-head-meta">
+                  <p class="formula hero-ticket-formula">1 kcal = 4.184 kJ</p>
+                  <span class="hero-zone-pill" id="heroZonePill">轻食区间</span>
+                </div>
               </div>
 
               <div class="hero-ticket-grid">
-                <article class="hero-ticket-cell">
-                  <span class="hero-ticket-unit">kJ</span>
-                  <strong class="hero-ticket-number" id="heroKjValue">1000</strong>
-                </article>
-                <article class="hero-ticket-cell">
-                  <span class="hero-ticket-unit">kcal</span>
-                  <strong class="hero-ticket-number" id="heroKcalValue">239</strong>
-                </article>
+                <label class="hero-ticket-cell value-card value-card-kj" id="valueCardKj" for="kjInput">
+                  <span class="value-label">千焦</span>
+                  <div class="value-input-row">
+                    <input id="kjInput" class="value-input" type="number" inputmode="decimal" min="0" step="any" placeholder="0" />
+                    <span class="value-unit">kJ</span>
+                  </div>
+                  <p class="hero-ticket-hint">包装上更常见的能量写法</p>
+                </label>
+
+                <div class="hero-ticket-divider" aria-hidden="true">
+                  <span class="hero-ticket-divider-mark">≈</span>
+                  <span class="hero-ticket-divider-text">任意一边输入</span>
+                </div>
+
+                <label class="hero-ticket-cell value-card value-card-kcal" id="valueCardKcal" for="kcalInput">
+                  <span class="value-label">卡路里</span>
+                  <div class="value-input-row">
+                    <input id="kcalInput" class="value-input" type="number" inputmode="decimal" min="0" step="any" placeholder="0" />
+                    <span class="value-unit">kcal</span>
+                  </div>
+                  <p class="hero-ticket-hint">更适合脑内快速判断的读法</p>
+                </label>
               </div>
 
-              <div class="hero-ticket-meta">
-                <p class="hero-ticket-caption">On Pack</p>
-                <p class="hero-ticket-line" id="heroLabelLine">1000 kJ ≈ 239 kcal</p>
-              </div>
-            </section>
+              <div class="hero-ticket-meta hero-ticket-meta--interactive">
+                <div>
+                  <p class="hero-ticket-caption">On Pack</p>
+                  <p class="hero-ticket-line" id="heroLabelLine">1000 kJ ≈ 239 kcal</p>
+                </div>
 
-            <section class="hero-ruler-card">
-              <div class="hero-ruler-copy">
-                <p class="hero-ticket-kicker">Pocket Ready</p>
-                <p class="hero-ruler-title">打开就算，不需要重新想公式。</p>
+                <div class="hero-ruler-inline">
+                  <div class="hero-ruler-copy">
+                    <p class="hero-ticket-kicker">Energy Position</p>
+                    <p class="hero-ruler-title">拖一拖，立刻看到它在轻食还是主餐区间。</p>
+                  </div>
+                  <div class="hero-ruler-track" aria-hidden="true">
+                    <span class="hero-ruler-fill" id="heroRulerFill"></span>
+                  </div>
+                  <div class="hero-ruler-scale" aria-hidden="true">
+                    <span>0</span>
+                    <span>轻</span>
+                    <span>中</span>
+                    <span>高</span>
+                  </div>
+                </div>
               </div>
-              <div class="hero-ruler-track" aria-hidden="true">
-                <span class="hero-ruler-fill" id="heroRulerFill"></span>
-              </div>
-              <div class="hero-ruler-scale" aria-hidden="true">
-                <span>0</span>
-                <span>轻</span>
-                <span>中</span>
-                <span>高</span>
+
+              <div class="hero-ticket-controls">
+                <div class="drag-mode" role="tablist" aria-label="拖动单位">
+                  <button class="segment-button is-active" id="dragModeKj" type="button">拖动时按 kJ 调整</button>
+                  <button class="segment-button" id="dragModeKcal" type="button">拖动时按 kcal 调整</button>
+                </div>
+
+                <div class="slider-wrap">
+                  <div class="slider-summary">
+                    <p id="sliderLabel">当前拖动单位：kJ</p>
+                    <p id="sliderValue">1000 kJ</p>
+                  </div>
+                  <input
+                    id="energySlider"
+                    class="energy-slider"
+                    type="range"
+                    min="0"
+                    max="5000"
+                    step="10"
+                    value="1000"
+                    aria-label="能量值滑动条"
+                    aria-valuemin="0"
+                    aria-valuemax="5000"
+                    aria-valuenow="1000"
+                  />
+                  <div class="slider-scale" id="sliderScale" aria-hidden="true"></div>
+                </div>
+
+                <div class="quick-actions">
+                  <div class="quick-actions-header">
+                    <p>快捷值</p>
+                    <button class="ghost-button" id="saveHistoryButton" type="button">保存到最近使用</button>
+                  </div>
+                  <div class="preset-grid" id="presetGrid"></div>
+                </div>
               </div>
             </section>
           </aside>
@@ -104,60 +159,6 @@
       </header>
 
       <main class="content-grid">
-        <section class="panel converter-panel">
-          <div class="panel-heading">
-            <div>
-              <p class="panel-kicker">Instant Convert</p>
-              <h2>一眼看懂能量换算</h2>
-            </div>
-            <p class="formula">1 kcal = 4.184 kJ</p>
-          </div>
-
-          <div class="converter-grid">
-            <label class="value-card value-card-kj" id="valueCardKj" for="kjInput">
-              <span class="value-label">千焦</span>
-              <div class="value-input-row">
-                <input id="kjInput" class="value-input" type="number" inputmode="decimal" min="0" step="any" />
-                <span class="value-unit">kJ</span>
-              </div>
-            </label>
-
-            <div class="equals-mark" aria-hidden="true">
-              <span>≈</span>
-            </div>
-
-            <label class="value-card value-card-kcal" id="valueCardKcal" for="kcalInput">
-              <span class="value-label">卡路里</span>
-              <div class="value-input-row">
-                <input id="kcalInput" class="value-input" type="number" inputmode="decimal" min="0" step="any" />
-                <span class="value-unit">kcal</span>
-              </div>
-            </label>
-          </div>
-
-          <div class="drag-mode" role="tablist" aria-label="拖动单位">
-            <button class="segment-button is-active" id="dragModeKj" type="button">拖动时按 kJ 调整</button>
-            <button class="segment-button" id="dragModeKcal" type="button">拖动时按 kcal 调整</button>
-          </div>
-
-          <div class="slider-wrap">
-            <div class="slider-summary">
-              <p id="sliderLabel">当前拖动单位：kJ</p>
-              <p id="sliderValue">1000 kJ</p>
-            </div>
-            <input id="energySlider" class="energy-slider" type="range" min="0" max="5000" step="10" value="1000" />
-            <div class="slider-scale" id="sliderScale" aria-hidden="true"></div>
-          </div>
-
-          <div class="quick-actions">
-            <div class="quick-actions-header">
-              <p>快捷值</p>
-              <button class="ghost-button" id="saveHistoryButton" type="button">保存到最近使用</button>
-            </div>
-            <div class="preset-grid" id="presetGrid"></div>
-          </div>
-        </section>
-
         <section class="panel visual-panel">
           <div class="panel-heading">
             <div>

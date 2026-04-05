@@ -3,6 +3,8 @@ const HISTORY_LIMIT = 9;
 const HISTORY_STORAGE_KEY = 'kj-kcal-history-v1';
 const STATE_STORAGE_KEY = 'kj-kcal-state-v1';
 const HERO_FILL_FLOOR = 8;
+const DIAL_MIN_PERCENT = 2;
+const DIAL_ANIMATION_MS = 420;
 
 const presets = [
   { label: '100 kJ', value: 100, unit: 'kj', note: '极轻量' },
@@ -86,8 +88,6 @@ const installBanner = document.querySelector('#installBanner');
 const installTitle = document.querySelector('#installTitle');
 const installDescription = document.querySelector('#installDescription');
 const installButton = document.querySelector('#installButton');
-const heroKjValue = document.querySelector('#heroKjValue');
-const heroKcalValue = document.querySelector('#heroKcalValue');
 const heroZonePill = document.querySelector('#heroZonePill');
 const heroLabelLine = document.querySelector('#heroLabelLine');
 const heroRulerFill = document.querySelector('#heroRulerFill');
@@ -99,6 +99,8 @@ const sheetTranslation = document.querySelector('#sheetTranslation');
 const sheetScenario = document.querySelector('#sheetScenario');
 const sheetLabelLine = document.querySelector('#sheetLabelLine');
 const sheetFootnote = document.querySelector('#sheetFootnote');
+const supportsDialPropertyAnimation =
+  typeof CSS !== 'undefined' && typeof CSS.registerProperty === 'function';
 
 let deferredInstallPrompt = null;
 let previousRender = {
@@ -106,6 +108,8 @@ let previousRender = {
   zoneName: '',
 };
 let lastMotionAt = 0;
+let dialAnimationFrame = 0;
+let currentDialPercent = DIAL_MIN_PERCENT;
 
 const loadedState = loadState();
 const loadedHistory = loadHistory();
@@ -122,6 +126,8 @@ renderHistory();
 render();
 setupInstallPrompt();
 registerServiceWorker();
+preventWheelChangeOnFocus(kjInput);
+preventWheelChangeOnFocus(kcalInput);
 
 kjInput.addEventListener('input', (event) => {
   const value = parseInputValue(event.target.value);
@@ -203,7 +209,6 @@ function render() {
   const sliderConfig = getSliderConfig(state.dragUnit, kj, kcal);
   const sliderCurrentValue = state.dragUnit === 'kj' ? kj : kcal;
   const zone = getZone(kj);
-  const storyMode = state.dragUnit === 'kj' ? 'kj' : 'kcal';
   const formattedKj = formatNumber(kj);
   const formattedKcal = formatNumber(kcal);
   const packaging = getPackagingContent(kj, kcal, zone);
@@ -222,6 +227,9 @@ function render() {
   energySlider.max = String(sliderConfig.max);
   energySlider.step = String(sliderConfig.step);
   energySlider.value = String(clamp(sliderCurrentValue, 0, sliderConfig.max));
+  energySlider.setAttribute('aria-valuemin', '0');
+  energySlider.setAttribute('aria-valuemax', String(sliderConfig.max));
+  energySlider.setAttribute('aria-valuenow', String(clamp(sliderCurrentValue, 0, sliderConfig.max)));
   sliderLabel.textContent = `当前拖动单位：${state.dragUnit === 'kj' ? 'kJ' : 'kcal'}`;
   sliderValue.textContent = `${formatNumber(sliderCurrentValue)} ${state.dragUnit === 'kj' ? 'kJ' : 'kcal'}`;
   sliderScale.replaceChildren(...sliderConfig.scale.map((text) => createScaleText(text)));
@@ -236,8 +244,6 @@ function render() {
   labelValue.textContent = `${formattedKj} kJ / ${formattedKcal} kcal`;
   zoneValue.textContent = zone.name;
   zoneNote.textContent = zone.note;
-  heroKjValue.textContent = formattedKj;
-  heroKcalValue.textContent = formattedKcal;
   heroZonePill.textContent = zone.name;
   heroLabelLine.textContent = `${formattedKj} kJ ≈ ${formattedKcal} kcal`;
   packZoneBadge.textContent = zone.name;
@@ -250,14 +256,15 @@ function render() {
   sheetFootnote.textContent = packaging.footnote;
 
   const dialPercent = Math.min(kj / Math.max(sliderConfig.kjCeiling, 1), 1);
-  energyDial.style.setProperty('--dial-max', `${Math.max(dialPercent * 100, 2)}%`);
-  heroRulerFill.style.width = `${Math.max(dialPercent * 100, HERO_FILL_FLOOR)}%`;
+  const dialPercentValue = Math.max(dialPercent * 100, DIAL_MIN_PERCENT);
+  setDialPercent(dialPercentValue, previousRender.kilojoules !== null);
+  heroRulerFill.style.width = `${Math.max(dialPercentValue, HERO_FILL_FLOOR)}%`;
 
   highlightComparison(kj);
   renderInstallBanner();
 
   if (shouldPulseValue) {
-    pulseElements([heroKjValue, heroKcalValue, dialPrimary, dialSecondary, sheetKjValue, sheetKcalValue]);
+    pulseElements([valueCardKj, valueCardKcal, dialPrimary, dialSecondary, sheetKjValue, sheetKcalValue]);
   }
 
   if (shouldPulseZone) {
@@ -475,10 +482,85 @@ function registerServiceWorker() {
   }
 
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {
-      // Service worker registration is best-effort.
-    });
+    navigator.serviceWorker
+      .register('/sw.js', { updateViaCache: 'none' })
+      .then((registration) => {
+        registration.update().catch(() => undefined);
+      })
+      .catch(() => {
+        // Service worker registration is best-effort.
+      });
   });
+}
+
+function preventWheelChangeOnFocus(input) {
+  input.addEventListener(
+    'wheel',
+    (event) => {
+      if (document.activeElement === input) {
+        event.preventDefault();
+      }
+    },
+    { passive: false },
+  );
+}
+
+function setDialPercent(targetPercent, shouldAnimate) {
+  if (!energyDial) {
+    return;
+  }
+
+  const clampedTarget = clamp(targetPercent, DIAL_MIN_PERCENT, 100);
+
+  if (supportsDialPropertyAnimation || !shouldAnimate) {
+    stopDialAnimation();
+    currentDialPercent = clampedTarget;
+    energyDial.style.setProperty('--dial-max', `${clampedTarget}%`);
+    return;
+  }
+
+  animateDialFallback(clampedTarget);
+}
+
+function animateDialFallback(targetPercent) {
+  stopDialAnimation();
+
+  const startPercent = currentDialPercent;
+  const delta = targetPercent - startPercent;
+
+  if (Math.abs(delta) < 0.01) {
+    currentDialPercent = targetPercent;
+    energyDial.style.setProperty('--dial-max', `${targetPercent}%`);
+    return;
+  }
+
+  const startAt = performance.now();
+  const step = (now) => {
+    const progress = clamp((now - startAt) / DIAL_ANIMATION_MS, 0, 1);
+    const easedProgress = 1 - (1 - progress) ** 3;
+    currentDialPercent = startPercent + delta * easedProgress;
+    energyDial.style.setProperty('--dial-max', `${currentDialPercent}%`);
+
+    if (progress < 1) {
+      dialAnimationFrame = window.requestAnimationFrame(step);
+      return;
+    }
+
+    currentDialPercent = targetPercent;
+    energyDial.style.setProperty('--dial-max', `${targetPercent}%`);
+    dialAnimationFrame = 0;
+  };
+
+  dialAnimationFrame = window.requestAnimationFrame(step);
+}
+
+function stopDialAnimation() {
+  if (!dialAnimationFrame) {
+    return;
+  }
+
+  window.cancelAnimationFrame(dialAnimationFrame);
+  dialAnimationFrame = 0;
 }
 
 function getSliderConfig(unit, kj, kcal) {
@@ -658,7 +740,8 @@ function isStandalone() {
 
 function detectIosSafari() {
   const userAgent = window.navigator.userAgent.toLowerCase();
-  const isIos = /iphone|ipad|ipod/.test(userAgent);
+  const isTouchMac = /macintosh/.test(userAgent) && window.navigator.maxTouchPoints > 1;
+  const isIos = /iphone|ipad|ipod/.test(userAgent) || isTouchMac;
   const isSafari = /safari/.test(userAgent) && !/crios|fxios|edgios/.test(userAgent);
   return isIos && isSafari;
 }

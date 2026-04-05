@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kj-kcal-pwa-v2';
+const CACHE_NAME = 'kj-kcal-pwa-v6';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -20,9 +20,7 @@ const APP_SHELL = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).catch(() => undefined),
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
   self.skipWaiting();
 });
 
@@ -46,6 +44,27 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  const requestUrl = new URL(event.request.url);
+  const isSameOrigin = requestUrl.origin === self.location.origin;
+  const isNavigationRequest =
+    event.request.mode === 'navigate' ||
+    (isSameOrigin && (requestUrl.pathname === '/' || requestUrl.pathname === '/index.html'));
+
+  if (isNavigationRequest) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put('/index.html', responseClone).catch(() => undefined);
+          });
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request).then((response) => response ?? caches.match('/index.html'))),
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -60,7 +79,7 @@ self.addEventListener('fetch', (event) => {
           });
           return networkResponse;
         })
-        .catch(() => caches.match('/index.html'));
+        .catch(() => Response.error());
     }),
   );
 });
