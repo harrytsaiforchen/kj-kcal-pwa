@@ -14,17 +14,6 @@ const DEFAULT_DAILY_PROFILE = {
   activity: 1.375,
 };
 
-const presets = [
-  { label: '100 kJ', value: 100, unit: 'kj', note: '极轻量' },
-  { label: '500 kJ', value: 500, unit: 'kj', note: '轻巧补给' },
-  { label: '1000 kJ', value: 1000, unit: 'kj', note: '常见零食' },
-  { label: '2000 kJ', value: 2000, unit: 'kj', note: '接近正餐' },
-  { label: '250 kcal', value: 250, unit: 'kcal', note: '轻食范围' },
-  { label: '500 kcal', value: 500, unit: 'kcal', note: '标准一餐' },
-  { label: '750 kcal', value: 750, unit: 'kcal', note: '高能量' },
-  { label: '1000 kcal', value: 1000, unit: 'kcal', note: '强补给' },
-];
-
 const comparisonCards = [
   {
     title: '轻盈零食',
@@ -79,11 +68,22 @@ const energySlider = document.querySelector('#energySlider');
 const sliderLabel = document.querySelector('#sliderLabel');
 const sliderValue = document.querySelector('#sliderValue');
 const sliderScale = document.querySelector('#sliderScale');
-const presetGrid = document.querySelector('#presetGrid');
 const comparisonGrid = document.querySelector('#comparisonGrid');
 const historyList = document.querySelector('#historyList');
 const clearHistoryButton = document.querySelector('#clearHistoryButton');
 const saveHistoryButton = document.querySelector('#saveHistoryButton');
+const heroAddCurrentButton = document.querySelector('#heroAddCurrentButton');
+const heroIntakeTotalKcal = document.querySelector('#heroIntakeTotalKcal');
+const heroIntakeTotalKj = document.querySelector('#heroIntakeTotalKj');
+const heroIntakeCountValue = document.querySelector('#heroIntakeCountValue');
+const heroBalanceLabel = document.querySelector('#heroBalanceLabel');
+const heroBalanceValue = document.querySelector('#heroBalanceValue');
+const heroPocketNote = document.querySelector('#heroPocketNote');
+const heroMetabolismCard = document.querySelector('#heroMetabolismCard');
+const heroMetabolismValue = document.querySelector('#heroMetabolismValue');
+const heroMetabolismNote = document.querySelector('#heroMetabolismNote');
+const metabolismToggleButton = document.querySelector('#metabolismToggleButton');
+const heroMetabolismPanel = document.querySelector('#heroMetabolismPanel');
 const dragModeKj = document.querySelector('#dragModeKj');
 const dragModeKcal = document.querySelector('#dragModeKcal');
 const dialPrimary = document.querySelector('#dialPrimary');
@@ -107,11 +107,13 @@ const sheetTranslation = document.querySelector('#sheetTranslation');
 const sheetScenario = document.querySelector('#sheetScenario');
 const sheetLabelLine = document.querySelector('#sheetLabelLine');
 const sheetFootnote = document.querySelector('#sheetFootnote');
-const importCurrentButton = document.querySelector('#importCurrentButton');
 const addEntryButton = document.querySelector('#addEntryButton');
 const intakeTotalKcal = document.querySelector('#intakeTotalKcal');
 const intakeTotalKj = document.querySelector('#intakeTotalKj');
 const intakeCountValue = document.querySelector('#intakeCountValue');
+const balanceMetabolismValue = document.querySelector('#balanceMetabolismValue');
+const balanceCountMirrorValue = document.querySelector('#balanceCountMirrorValue');
+const balanceIntakeMirrorNote = document.querySelector('#balanceIntakeMirrorNote');
 const entryList = document.querySelector('#entryList');
 const sexInput = document.querySelector('#sexInput');
 const ageInput = document.querySelector('#ageInput');
@@ -135,6 +137,7 @@ let previousRender = {
 let lastMotionAt = 0;
 let dialAnimationFrame = 0;
 let currentDialPercent = DIAL_MIN_PERCENT;
+let isMetabolismPanelOpen = false;
 
 const loadedState = loadState();
 const loadedHistory = loadHistory();
@@ -147,7 +150,6 @@ const state = {
   dailyBalance: loadedDailyBalance,
 };
 
-renderPresets();
 renderComparisons();
 renderHistory();
 renderDailyBalanceEntries();
@@ -217,17 +219,8 @@ saveHistoryButton.addEventListener('click', () => {
   saveCurrentToHistory();
 });
 
-importCurrentButton.addEventListener('click', () => {
-  state.dailyBalance.entries.push(
-    createDailyEntry({
-      name: `条目 ${state.dailyBalance.entries.length + 1}`,
-      value: roundForStorage(kjToKcal(state.kilojoules)),
-      unit: 'kcal',
-    }),
-  );
-  persistDailyBalance();
-  renderDailyBalanceEntries();
-  renderDailyBalanceMetrics();
+heroAddCurrentButton.addEventListener('click', () => {
+  addCurrentToDailyBalance();
 });
 
 addEntryButton.addEventListener('click', () => {
@@ -235,6 +228,11 @@ addEntryButton.addEventListener('click', () => {
   persistDailyBalance();
   renderDailyBalanceEntries();
   renderDailyBalanceMetrics();
+});
+
+metabolismToggleButton.addEventListener('click', () => {
+  isMetabolismPanelOpen = !isMetabolismPanelOpen;
+  renderMetabolismPanelState();
 });
 
 sexInput.addEventListener('change', () => {
@@ -338,6 +336,7 @@ function render() {
   highlightComparison(kj);
   syncDailyProfileInputs();
   renderDailyBalanceMetrics();
+  renderMetabolismPanelState();
   renderInstallBanner();
 
   if (shouldPulseValue) {
@@ -352,26 +351,6 @@ function render() {
     kilojoules: kj,
     zoneName: zone.name,
   };
-}
-
-function renderPresets() {
-  const fragment = document.createDocumentFragment();
-
-  presets.forEach((preset) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'preset-button';
-    button.innerHTML = `<strong>${preset.label}</strong><span>${preset.note}</span>`;
-    button.addEventListener('click', () => {
-      state.kilojoules = preset.unit === 'kj' ? preset.value : kcalToKj(preset.value);
-      state.dragUnit = preset.unit;
-      persistState();
-      render();
-    });
-    fragment.append(button);
-  });
-
-  presetGrid.replaceChildren(fragment);
 }
 
 function renderComparisons() {
@@ -507,6 +486,19 @@ function saveCurrentToHistory() {
   renderHistory();
 }
 
+function addCurrentToDailyBalance() {
+  state.dailyBalance.entries.push(
+    createDailyEntry({
+      name: `条目 ${state.dailyBalance.entries.length + 1}`,
+      value: roundForStorage(kjToKcal(state.kilojoules)),
+      unit: 'kcal',
+    }),
+  );
+  persistDailyBalance();
+  renderDailyBalanceEntries();
+  renderDailyBalanceMetrics();
+}
+
 function renderDailyBalanceEntries() {
   const fragment = document.createDocumentFragment();
 
@@ -592,6 +584,7 @@ function renderDailyBalanceMetrics() {
   const profile = state.dailyBalance.profile;
   const metabolism = calculateDailyMetabolism(profile);
   const difference = metabolism.tdee - totals.kcal;
+  const absoluteDifference = Math.abs(difference);
   const activeEntries = state.dailyBalance.entries.filter(
     (entry) => entry.value > 0.001 || entry.name.trim() !== '',
   ).length;
@@ -599,13 +592,24 @@ function renderDailyBalanceMetrics() {
   intakeTotalKcal.textContent = `${formatNumber(totals.kcal)} kcal`;
   intakeTotalKj.textContent = `${formatNumber(totals.kj)} kJ`;
   intakeCountValue.textContent = `${activeEntries} 项`;
+  heroIntakeTotalKcal.textContent = `${formatNumber(totals.kcal)} kcal`;
+  heroIntakeTotalKj.textContent = `${formatNumber(totals.kj)} kJ`;
+  heroIntakeCountValue.textContent = `${activeEntries} 项`;
+  heroMetabolismValue.textContent = `${formatNumber(metabolism.tdee)} kcal`;
+  heroMetabolismNote.textContent = `基础代谢约 ${formatNumber(metabolism.bmr)} kcal，按当前活动水平换算。`;
   bmrValue.textContent = `${formatNumber(metabolism.bmr)} kcal`;
   tdeeValue.textContent = `${formatNumber(metabolism.tdee)} kcal`;
+  balanceMetabolismValue.textContent = `${formatNumber(metabolism.tdee)} kcal`;
+  balanceCountMirrorValue.textContent = `${activeEntries} 项`;
+  balanceIntakeMirrorNote.textContent = `${formatNumber(totals.kj)} kJ / ${formatNumber(totals.kcal)} kcal`;
 
   deficitCard.classList.remove('is-positive', 'is-negative');
 
   if (difference >= 0) {
     deficitCard.classList.add('is-positive');
+    heroBalanceLabel.textContent = '今日热量缺口';
+    heroBalanceValue.textContent = `${formatNumber(difference)} kcal`;
+    heroPocketNote.textContent = `当前累计距离预计总消耗还差约 ${formatNumber(difference)} kcal。`;
     deficitLabel.textContent = '今日热量缺口';
     deficitValue.textContent = `${formatNumber(difference)} kcal`;
     deficitNote.textContent = `按当前记录，你今天距离预计总消耗还差约 ${formatNumber(difference)} kcal。`;
@@ -613,9 +617,12 @@ function renderDailyBalanceMetrics() {
   }
 
   deficitCard.classList.add('is-negative');
+  heroBalanceLabel.textContent = '今日热量盈余';
+  heroBalanceValue.textContent = `${formatNumber(absoluteDifference)} kcal`;
+  heroPocketNote.textContent = `当前累计比预计总消耗多出约 ${formatNumber(absoluteDifference)} kcal。`;
   deficitLabel.textContent = '今日热量盈余';
-  deficitValue.textContent = `${formatNumber(Math.abs(difference))} kcal`;
-  deficitNote.textContent = `按当前记录，你今天比预计总消耗多摄入约 ${formatNumber(Math.abs(difference))} kcal。`;
+  deficitValue.textContent = `${formatNumber(absoluteDifference)} kcal`;
+  deficitNote.textContent = `按当前记录，你今天比预计总消耗多摄入约 ${formatNumber(absoluteDifference)} kcal。`;
 }
 
 function syncDailyProfileInputs() {
@@ -633,6 +640,13 @@ function syncDailyProfileInputs() {
 
   sexInput.value = state.dailyBalance.profile.sex;
   activityInput.value = String(state.dailyBalance.profile.activity);
+}
+
+function renderMetabolismPanelState() {
+  heroMetabolismPanel.hidden = !isMetabolismPanelOpen;
+  heroMetabolismCard.classList.toggle('is-open', isMetabolismPanelOpen);
+  metabolismToggleButton.setAttribute('aria-expanded', String(isMetabolismPanelOpen));
+  metabolismToggleButton.textContent = isMetabolismPanelOpen ? '收起参数' : '填写参数';
 }
 
 function getDailyBalanceTotals() {

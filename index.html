@@ -36,13 +36,13 @@
             <p class="eyebrow">Pocket Energy Tool</p>
             <h1>千焦 / 卡路里自由转换</h1>
             <p class="hero-description">
-              输入任意一边，另一边实时联动。拖动能量刻度，看清它在日常饮食里的位置，还能直接加到 iPhone 主屏幕随手打开。
+              输入任意一边，另一边实时联动。拖动能量刻度看清它在日常饮食里的位置，也能把每次输入持续加入今日累计，顺手看到热量缺口。
             </p>
 
             <div class="hero-badges">
               <span class="badge">双向输入</span>
+              <span class="badge">累计相加</span>
               <span class="badge">可视化能量尺</span>
-              <span class="badge">离线可用</span>
               <span class="badge">主屏幕模式</span>
             </div>
           </div>
@@ -135,12 +135,121 @@
                   <div class="slider-scale" id="sliderScale" aria-hidden="true"></div>
                 </div>
 
-                <div class="quick-actions">
-                  <div class="quick-actions-header">
-                    <p>快捷值</p>
-                    <button class="ghost-button" id="saveHistoryButton" type="button">保存到最近使用</button>
-                  </div>
-                  <div class="preset-grid" id="presetGrid"></div>
+                <div class="hero-pocket-grid">
+                  <article class="hero-pocket-card hero-pocket-card--sum">
+                    <div class="hero-pocket-head">
+                      <div>
+                        <p class="hero-ticket-kicker">Running Total</p>
+                        <p class="hero-pocket-title">把每次输入持续加入今日累计</p>
+                      </div>
+                      <button class="ghost-button" id="saveHistoryButton" type="button">保存到最近使用</button>
+                    </div>
+
+                    <div class="hero-pocket-metrics">
+                      <div>
+                        <p class="hero-pocket-label">累计摄入</p>
+                        <p class="hero-pocket-value" id="heroIntakeTotalKcal">0 kcal</p>
+                        <p class="hero-pocket-subvalue" id="heroIntakeTotalKj">0 kJ</p>
+                      </div>
+
+                      <div class="hero-pocket-stack">
+                        <div class="hero-pocket-mini">
+                          <span class="hero-pocket-label">条目数</span>
+                          <strong class="hero-pocket-mini-value" id="heroIntakeCountValue">0 项</strong>
+                        </div>
+                        <div class="hero-pocket-mini">
+                          <span class="hero-pocket-label" id="heroBalanceLabel">今日热量缺口</span>
+                          <strong class="hero-pocket-mini-value" id="heroBalanceValue">0 kcal</strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="hero-pocket-actions">
+                      <button class="ghost-button" id="heroAddCurrentButton" type="button">把当前数值加入累计</button>
+                      <p class="hero-pocket-note" id="heroPocketNote">累计明细会同步到下方 Daily Balance。</p>
+                    </div>
+                  </article>
+
+                  <article class="hero-pocket-card hero-pocket-card--metabolism" id="heroMetabolismCard">
+                    <div class="hero-pocket-head">
+                      <div>
+                        <p class="hero-ticket-kicker">Metabolism Pocket</p>
+                        <p class="hero-pocket-title">每日代谢估算</p>
+                      </div>
+                      <button
+                        class="ghost-button hero-pocket-toggle"
+                        id="metabolismToggleButton"
+                        type="button"
+                        aria-expanded="false"
+                        aria-controls="heroMetabolismPanel"
+                      >
+                        填写参数
+                      </button>
+                    </div>
+
+                    <div class="hero-metabolism-compact">
+                      <p class="hero-pocket-label">预计总消耗</p>
+                      <p class="hero-pocket-value" id="heroMetabolismValue">0 kcal</p>
+                      <p class="hero-pocket-note" id="heroMetabolismNote">未展开时只显示代谢热量。</p>
+                    </div>
+
+                    <div class="hero-metabolism-panel" id="heroMetabolismPanel" hidden>
+                      <div class="metabolism-form-grid hero-metabolism-form-grid">
+                        <label class="profile-field" for="sexInput">
+                          <span class="profile-label">性别</span>
+                          <select class="profile-select" id="sexInput">
+                            <option value="female">女性</option>
+                            <option value="male">男性</option>
+                          </select>
+                        </label>
+
+                        <label class="profile-field" for="ageInput">
+                          <span class="profile-label">年龄</span>
+                          <input class="profile-input" id="ageInput" type="number" inputmode="numeric" min="10" max="100" step="1" />
+                        </label>
+
+                        <label class="profile-field" for="heightInput">
+                          <span class="profile-label">身高</span>
+                          <div class="profile-input-row">
+                            <input class="profile-input" id="heightInput" type="number" inputmode="decimal" min="100" max="250" step="0.1" />
+                            <span class="profile-unit">cm</span>
+                          </div>
+                        </label>
+
+                        <label class="profile-field" for="weightInput">
+                          <span class="profile-label">体重</span>
+                          <div class="profile-input-row">
+                            <input class="profile-input" id="weightInput" type="number" inputmode="decimal" min="20" max="300" step="0.1" />
+                            <span class="profile-unit">kg</span>
+                          </div>
+                        </label>
+
+                        <label class="profile-field profile-field-wide" for="activityInput">
+                          <span class="profile-label">活动水平</span>
+                          <select class="profile-select" id="activityInput">
+                            <option value="1.2">久坐为主</option>
+                            <option value="1.375">轻度活动</option>
+                            <option value="1.55">中等活动</option>
+                            <option value="1.725">高活动量</option>
+                            <option value="1.9">高强度训练</option>
+                          </select>
+                        </label>
+                      </div>
+
+                      <div class="metabolism-summary-grid hero-metabolism-summary-grid">
+                        <article class="balance-summary-card">
+                          <p class="balance-summary-label">基础代谢</p>
+                          <strong class="balance-summary-value" id="bmrValue">0 kcal</strong>
+                          <p class="balance-summary-note">静息状态估算</p>
+                        </article>
+                        <article class="balance-summary-card">
+                          <p class="balance-summary-label">预计总消耗</p>
+                          <strong class="balance-summary-value" id="tdeeValue">0 kcal</strong>
+                          <p class="balance-summary-note">含活动系数</p>
+                        </article>
+                      </div>
+                    </div>
+                  </article>
                 </div>
               </div>
             </section>
@@ -204,6 +313,74 @@
           </div>
         </section>
 
+        <section class="panel balance-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="panel-kicker">Daily Balance</p>
+              <h2>把累计摄入和今日热量缺口放到一起看</h2>
+            </div>
+            <p class="formula">TDEE - Intake</p>
+          </div>
+
+          <div class="balance-grid">
+            <section class="balance-column">
+              <div class="balance-subhead">
+                <div>
+                  <p class="balance-kicker">Intake Builder</p>
+                  <h3>今日摄入明细</h3>
+                </div>
+                <div class="balance-actions">
+                  <button class="ghost-button" id="addEntryButton" type="button">添加一项</button>
+                </div>
+              </div>
+
+              <div class="balance-summary-grid">
+                <article class="balance-summary-card">
+                  <p class="balance-summary-label">总摄入</p>
+                  <strong class="balance-summary-value" id="intakeTotalKcal">0 kcal</strong>
+                  <p class="balance-summary-note" id="intakeTotalKj">0 kJ</p>
+                </article>
+                <article class="balance-summary-card">
+                  <p class="balance-summary-label">条目数</p>
+                  <strong class="balance-summary-value" id="intakeCountValue">0 项</strong>
+                  <p class="balance-summary-note">把早餐、午餐、零食分开记更直观。</p>
+                </article>
+              </div>
+
+              <div class="entry-list" id="entryList"></div>
+            </section>
+
+            <section class="balance-column balance-column-balance">
+              <div class="balance-subhead">
+                <div>
+                  <p class="balance-kicker">Balance Readout</p>
+                  <h3>今日热量缺口</h3>
+                </div>
+                <p class="balance-note">代谢参数在上方 Pocket Energy Tool 小窗调整。</p>
+              </div>
+
+              <div class="balance-summary-grid">
+                <article class="balance-summary-card">
+                  <p class="balance-summary-label">预计总消耗</p>
+                  <strong class="balance-summary-value" id="balanceMetabolismValue">0 kcal</strong>
+                  <p class="balance-summary-note">来自上方每日代谢小窗</p>
+                </article>
+                <article class="balance-summary-card">
+                  <p class="balance-summary-label">累计条目</p>
+                  <strong class="balance-summary-value" id="balanceCountMirrorValue">0 项</strong>
+                  <p class="balance-summary-note" id="balanceIntakeMirrorNote">0 kJ / 0 kcal</p>
+                </article>
+              </div>
+
+              <article class="deficit-card" id="deficitCard">
+                <p class="balance-kicker" id="deficitLabel">今日热量缺口</p>
+                <p class="deficit-value" id="deficitValue">0 kcal</p>
+                <p class="deficit-note" id="deficitNote">输入你的身体数据和今日摄入后，这里会显示你今天大概还差多少热量。</p>
+              </article>
+            </section>
+          </div>
+        </section>
+
         <section class="panel narrative-panel">
           <div class="panel-heading">
             <div>
@@ -260,117 +437,6 @@
           </article>
 
           <div class="comparison-grid" id="comparisonGrid"></div>
-        </section>
-
-        <section class="panel balance-panel">
-          <div class="panel-heading">
-            <div>
-              <p class="panel-kicker">Daily Balance</p>
-              <h2>把今日摄入、代谢和热量缺口放到一起看</h2>
-            </div>
-            <p class="formula">TDEE - Intake</p>
-          </div>
-
-          <div class="balance-grid">
-            <section class="balance-column">
-              <div class="balance-subhead">
-                <div>
-                  <p class="balance-kicker">Intake Builder</p>
-                  <h3>今日摄入合计</h3>
-                </div>
-                <div class="balance-actions">
-                  <button class="ghost-button" id="importCurrentButton" type="button">加入当前换算</button>
-                  <button class="ghost-button" id="addEntryButton" type="button">添加一项</button>
-                </div>
-              </div>
-
-              <div class="balance-summary-grid">
-                <article class="balance-summary-card">
-                  <p class="balance-summary-label">总摄入</p>
-                  <strong class="balance-summary-value" id="intakeTotalKcal">0 kcal</strong>
-                  <p class="balance-summary-note" id="intakeTotalKj">0 kJ</p>
-                </article>
-                <article class="balance-summary-card">
-                  <p class="balance-summary-label">条目数</p>
-                  <strong class="balance-summary-value" id="intakeCountValue">0 项</strong>
-                  <p class="balance-summary-note">把早餐、午餐、零食分开记更直观。</p>
-                </article>
-              </div>
-
-              <div class="entry-list" id="entryList"></div>
-            </section>
-
-            <section class="balance-column balance-column-metabolism">
-              <div class="balance-subhead">
-                <div>
-                  <p class="balance-kicker">Metabolism</p>
-                  <h3>每日代谢估算</h3>
-                </div>
-                <p class="balance-note">按 Mifflin-St Jeor 公式估算</p>
-              </div>
-
-              <div class="metabolism-form-grid">
-                <label class="profile-field" for="sexInput">
-                  <span class="profile-label">性别</span>
-                  <select class="profile-select" id="sexInput">
-                    <option value="female">女性</option>
-                    <option value="male">男性</option>
-                  </select>
-                </label>
-
-                <label class="profile-field" for="ageInput">
-                  <span class="profile-label">年龄</span>
-                  <input class="profile-input" id="ageInput" type="number" inputmode="numeric" min="10" max="100" step="1" />
-                </label>
-
-                <label class="profile-field" for="heightInput">
-                  <span class="profile-label">身高</span>
-                  <div class="profile-input-row">
-                    <input class="profile-input" id="heightInput" type="number" inputmode="decimal" min="100" max="250" step="0.1" />
-                    <span class="profile-unit">cm</span>
-                  </div>
-                </label>
-
-                <label class="profile-field" for="weightInput">
-                  <span class="profile-label">体重</span>
-                  <div class="profile-input-row">
-                    <input class="profile-input" id="weightInput" type="number" inputmode="decimal" min="20" max="300" step="0.1" />
-                    <span class="profile-unit">kg</span>
-                  </div>
-                </label>
-
-                <label class="profile-field profile-field-wide" for="activityInput">
-                  <span class="profile-label">活动水平</span>
-                  <select class="profile-select" id="activityInput">
-                    <option value="1.2">久坐为主</option>
-                    <option value="1.375">轻度活动</option>
-                    <option value="1.55">中等活动</option>
-                    <option value="1.725">高活动量</option>
-                    <option value="1.9">高强度训练</option>
-                  </select>
-                </label>
-              </div>
-
-              <div class="metabolism-summary-grid">
-                <article class="balance-summary-card">
-                  <p class="balance-summary-label">基础代谢</p>
-                  <strong class="balance-summary-value" id="bmrValue">0 kcal</strong>
-                  <p class="balance-summary-note">静息状态估算</p>
-                </article>
-                <article class="balance-summary-card">
-                  <p class="balance-summary-label">预计总消耗</p>
-                  <strong class="balance-summary-value" id="tdeeValue">0 kcal</strong>
-                  <p class="balance-summary-note">含活动系数</p>
-                </article>
-              </div>
-
-              <article class="deficit-card" id="deficitCard">
-                <p class="balance-kicker" id="deficitLabel">今日热量缺口</p>
-                <p class="deficit-value" id="deficitValue">0 kcal</p>
-                <p class="deficit-note" id="deficitNote">输入你的身体数据和今日摄入后，这里会显示你今天大概还差多少热量。</p>
-              </article>
-            </section>
-          </div>
         </section>
 
         <section class="panel history-panel">
