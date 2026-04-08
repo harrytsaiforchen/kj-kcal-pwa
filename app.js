@@ -2,9 +2,17 @@ const KJ_PER_KCAL = 4.184;
 const HISTORY_LIMIT = 9;
 const HISTORY_STORAGE_KEY = 'kj-kcal-history-v1';
 const STATE_STORAGE_KEY = 'kj-kcal-state-v1';
+const DAILY_BALANCE_STORAGE_KEY = 'kj-kcal-daily-balance-v1';
 const HERO_FILL_FLOOR = 8;
 const DIAL_MIN_PERCENT = 2;
 const DIAL_ANIMATION_MS = 420;
+const DEFAULT_DAILY_PROFILE = {
+  sex: 'female',
+  age: 30,
+  heightCm: 165,
+  weightKg: 60,
+  activity: 1.375,
+};
 
 const presets = [
   { label: '100 kJ', value: 100, unit: 'kj', note: '极轻量' },
@@ -99,6 +107,23 @@ const sheetTranslation = document.querySelector('#sheetTranslation');
 const sheetScenario = document.querySelector('#sheetScenario');
 const sheetLabelLine = document.querySelector('#sheetLabelLine');
 const sheetFootnote = document.querySelector('#sheetFootnote');
+const importCurrentButton = document.querySelector('#importCurrentButton');
+const addEntryButton = document.querySelector('#addEntryButton');
+const intakeTotalKcal = document.querySelector('#intakeTotalKcal');
+const intakeTotalKj = document.querySelector('#intakeTotalKj');
+const intakeCountValue = document.querySelector('#intakeCountValue');
+const entryList = document.querySelector('#entryList');
+const sexInput = document.querySelector('#sexInput');
+const ageInput = document.querySelector('#ageInput');
+const heightInput = document.querySelector('#heightInput');
+const weightInput = document.querySelector('#weightInput');
+const activityInput = document.querySelector('#activityInput');
+const bmrValue = document.querySelector('#bmrValue');
+const tdeeValue = document.querySelector('#tdeeValue');
+const deficitCard = document.querySelector('#deficitCard');
+const deficitLabel = document.querySelector('#deficitLabel');
+const deficitValue = document.querySelector('#deficitValue');
+const deficitNote = document.querySelector('#deficitNote');
 const supportsDialPropertyAnimation =
   typeof CSS !== 'undefined' && typeof CSS.registerProperty === 'function';
 
@@ -113,21 +138,27 @@ let currentDialPercent = DIAL_MIN_PERCENT;
 
 const loadedState = loadState();
 const loadedHistory = loadHistory();
+const loadedDailyBalance = loadDailyBalance();
 
 const state = {
   kilojoules: loadedState.kilojoules,
   dragUnit: loadedState.dragUnit,
   history: loadedHistory,
+  dailyBalance: loadedDailyBalance,
 };
 
 renderPresets();
 renderComparisons();
 renderHistory();
+renderDailyBalanceEntries();
 render();
 setupInstallPrompt();
 registerServiceWorker();
 preventWheelChangeOnFocus(kjInput);
 preventWheelChangeOnFocus(kcalInput);
+preventWheelChangeOnFocus(ageInput);
+preventWheelChangeOnFocus(heightInput);
+preventWheelChangeOnFocus(weightInput);
 
 kjInput.addEventListener('input', (event) => {
   const value = parseInputValue(event.target.value);
@@ -184,6 +215,50 @@ clearHistoryButton.addEventListener('click', () => {
 
 saveHistoryButton.addEventListener('click', () => {
   saveCurrentToHistory();
+});
+
+importCurrentButton.addEventListener('click', () => {
+  state.dailyBalance.entries.push(
+    createDailyEntry({
+      name: `条目 ${state.dailyBalance.entries.length + 1}`,
+      value: roundForStorage(kjToKcal(state.kilojoules)),
+      unit: 'kcal',
+    }),
+  );
+  persistDailyBalance();
+  renderDailyBalanceEntries();
+  renderDailyBalanceMetrics();
+});
+
+addEntryButton.addEventListener('click', () => {
+  state.dailyBalance.entries.push(createDailyEntry());
+  persistDailyBalance();
+  renderDailyBalanceEntries();
+  renderDailyBalanceMetrics();
+});
+
+sexInput.addEventListener('change', () => {
+  state.dailyBalance.profile.sex = sexInput.value === 'male' ? 'male' : 'female';
+  persistDailyBalance();
+  renderDailyBalanceMetrics();
+});
+
+ageInput.addEventListener('change', () => {
+  updateDailyProfileNumber('age', ageInput.value, 10, 100, DEFAULT_DAILY_PROFILE.age);
+});
+
+heightInput.addEventListener('change', () => {
+  updateDailyProfileNumber('heightCm', heightInput.value, 100, 250, DEFAULT_DAILY_PROFILE.heightCm);
+});
+
+weightInput.addEventListener('change', () => {
+  updateDailyProfileNumber('weightKg', weightInput.value, 20, 300, DEFAULT_DAILY_PROFILE.weightKg);
+});
+
+activityInput.addEventListener('change', () => {
+  state.dailyBalance.profile.activity = normalizeActivityFactor(activityInput.value);
+  persistDailyBalance();
+  renderDailyBalanceMetrics();
 });
 
 installButton.addEventListener('click', async () => {
@@ -261,6 +336,8 @@ function render() {
   heroRulerFill.style.width = `${Math.max(dialPercentValue, HERO_FILL_FLOOR)}%`;
 
   highlightComparison(kj);
+  syncDailyProfileInputs();
+  renderDailyBalanceMetrics();
   renderInstallBanner();
 
   if (shouldPulseValue) {
@@ -428,6 +505,239 @@ function saveCurrentToHistory() {
   state.history = deduped.slice(0, HISTORY_LIMIT);
   persistHistory();
   renderHistory();
+}
+
+function renderDailyBalanceEntries() {
+  const fragment = document.createDocumentFragment();
+
+  state.dailyBalance.entries.forEach((entry, index) => {
+    fragment.append(createDailyEntryRow(entry, index));
+  });
+
+  entryList.replaceChildren(fragment);
+}
+
+function createDailyEntryRow(entry, index) {
+  const row = document.createElement('article');
+  row.className = 'entry-row';
+
+  const nameInput = document.createElement('input');
+  nameInput.className = 'entry-name';
+  nameInput.type = 'text';
+  nameInput.placeholder = '例如：早餐 / 午餐 / 零食';
+  nameInput.setAttribute('aria-label', `第 ${index + 1} 项名称`);
+  nameInput.value = entry.name;
+  nameInput.addEventListener('input', (event) => {
+    entry.name = event.target.value;
+    persistDailyBalance();
+    renderDailyBalanceMetrics();
+  });
+
+  const energyInput = document.createElement('input');
+  energyInput.className = 'entry-energy';
+  energyInput.type = 'number';
+  energyInput.inputMode = 'decimal';
+  energyInput.min = '0';
+  energyInput.step = 'any';
+  energyInput.placeholder = '0';
+  energyInput.setAttribute('aria-label', `第 ${index + 1} 项能量值`);
+  energyInput.value = entry.value > 0 ? formatInputNumber(entry.value) : '';
+  preventWheelChangeOnFocus(energyInput);
+  energyInput.addEventListener('input', (event) => {
+    entry.value = parseInputValue(event.target.value) ?? 0;
+    persistDailyBalance();
+    preview.textContent = formatEntryPreview(entry);
+    renderDailyBalanceMetrics();
+  });
+
+  const unitSelect = document.createElement('select');
+  unitSelect.className = 'entry-unit';
+  unitSelect.setAttribute('aria-label', `第 ${index + 1} 项能量单位`);
+  unitSelect.innerHTML = `
+    <option value="kcal">kcal</option>
+    <option value="kj">kJ</option>
+  `;
+  unitSelect.value = entry.unit;
+  unitSelect.addEventListener('change', (event) => {
+    entry.unit = event.target.value === 'kj' ? 'kj' : 'kcal';
+    persistDailyBalance();
+    preview.textContent = formatEntryPreview(entry);
+    renderDailyBalanceMetrics();
+  });
+
+  const preview = document.createElement('p');
+  preview.className = 'entry-preview';
+  preview.textContent = formatEntryPreview(entry);
+
+  const removeButton = document.createElement('button');
+  removeButton.type = 'button';
+  removeButton.className = 'ghost-button entry-remove';
+  removeButton.textContent = '删除';
+  removeButton.addEventListener('click', () => {
+    state.dailyBalance.entries = state.dailyBalance.entries.filter((item) => item.id !== entry.id);
+    if (state.dailyBalance.entries.length === 0) {
+      state.dailyBalance.entries = [createDailyEntry()];
+    }
+    persistDailyBalance();
+    renderDailyBalanceEntries();
+    renderDailyBalanceMetrics();
+  });
+
+  row.append(nameInput, energyInput, unitSelect, preview, removeButton);
+  return row;
+}
+
+function renderDailyBalanceMetrics() {
+  const totals = getDailyBalanceTotals();
+  const profile = state.dailyBalance.profile;
+  const metabolism = calculateDailyMetabolism(profile);
+  const difference = metabolism.tdee - totals.kcal;
+  const activeEntries = state.dailyBalance.entries.filter(
+    (entry) => entry.value > 0.001 || entry.name.trim() !== '',
+  ).length;
+
+  intakeTotalKcal.textContent = `${formatNumber(totals.kcal)} kcal`;
+  intakeTotalKj.textContent = `${formatNumber(totals.kj)} kJ`;
+  intakeCountValue.textContent = `${activeEntries} 项`;
+  bmrValue.textContent = `${formatNumber(metabolism.bmr)} kcal`;
+  tdeeValue.textContent = `${formatNumber(metabolism.tdee)} kcal`;
+
+  deficitCard.classList.remove('is-positive', 'is-negative');
+
+  if (difference >= 0) {
+    deficitCard.classList.add('is-positive');
+    deficitLabel.textContent = '今日热量缺口';
+    deficitValue.textContent = `${formatNumber(difference)} kcal`;
+    deficitNote.textContent = `按当前记录，你今天距离预计总消耗还差约 ${formatNumber(difference)} kcal。`;
+    return;
+  }
+
+  deficitCard.classList.add('is-negative');
+  deficitLabel.textContent = '今日热量盈余';
+  deficitValue.textContent = `${formatNumber(Math.abs(difference))} kcal`;
+  deficitNote.textContent = `按当前记录，你今天比预计总消耗多摄入约 ${formatNumber(Math.abs(difference))} kcal。`;
+}
+
+function syncDailyProfileInputs() {
+  if (document.activeElement !== ageInput) {
+    ageInput.value = String(state.dailyBalance.profile.age);
+  }
+
+  if (document.activeElement !== heightInput) {
+    heightInput.value = formatInputNumber(state.dailyBalance.profile.heightCm);
+  }
+
+  if (document.activeElement !== weightInput) {
+    weightInput.value = formatInputNumber(state.dailyBalance.profile.weightKg);
+  }
+
+  sexInput.value = state.dailyBalance.profile.sex;
+  activityInput.value = String(state.dailyBalance.profile.activity);
+}
+
+function getDailyBalanceTotals() {
+  const kj = state.dailyBalance.entries.reduce((sum, entry) => {
+    if (entry.unit === 'kj') {
+      return sum + entry.value;
+    }
+
+    return sum + kcalToKj(entry.value);
+  }, 0);
+
+  return {
+    kj,
+    kcal: kjToKcal(kj),
+  };
+}
+
+function calculateDailyMetabolism(profile) {
+  const base =
+    profile.sex === 'male'
+      ? 10 * profile.weightKg + 6.25 * profile.heightCm - 5 * profile.age + 5
+      : 10 * profile.weightKg + 6.25 * profile.heightCm - 5 * profile.age - 161;
+
+  const bmr = clampNonNegative(base);
+  return {
+    bmr,
+    tdee: bmr * profile.activity,
+  };
+}
+
+function formatEntryPreview(entry) {
+  if (entry.unit === 'kj') {
+    return `≈ ${formatNumber(kjToKcal(entry.value))} kcal`;
+  }
+
+  return `≈ ${formatNumber(kcalToKj(entry.value))} kJ`;
+}
+
+function createDailyEntry(overrides = {}) {
+  return {
+    id: createLocalId(),
+    name: typeof overrides.name === 'string' ? overrides.name : '',
+    value: clampNonNegative(Number(overrides.value)),
+    unit: overrides.unit === 'kj' ? 'kj' : 'kcal',
+  };
+}
+
+function createLocalId() {
+  return `entry-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+}
+
+function loadDailyBalance() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(DAILY_BALANCE_STORAGE_KEY) ?? '{}');
+    const entries = Array.isArray(parsed.entries)
+      ? parsed.entries.map((entry) => createDailyEntry(entry))
+      : [];
+
+    return {
+      entries: entries.length > 0 ? entries : [createDailyEntry()],
+      profile: normalizeDailyProfile(parsed.profile),
+    };
+  } catch {
+    return {
+      entries: [createDailyEntry()],
+      profile: { ...DEFAULT_DAILY_PROFILE },
+    };
+  }
+}
+
+function normalizeDailyProfile(profile) {
+  return {
+    sex: profile?.sex === 'male' ? 'male' : DEFAULT_DAILY_PROFILE.sex,
+    age: normalizeProfileNumber(profile?.age, 10, 100, DEFAULT_DAILY_PROFILE.age, true),
+    heightCm: normalizeProfileNumber(profile?.heightCm, 100, 250, DEFAULT_DAILY_PROFILE.heightCm),
+    weightKg: normalizeProfileNumber(profile?.weightKg, 20, 300, DEFAULT_DAILY_PROFILE.weightKg),
+    activity: normalizeActivityFactor(profile?.activity),
+  };
+}
+
+function updateDailyProfileNumber(key, value, min, max, fallback) {
+  state.dailyBalance.profile[key] = normalizeProfileNumber(value, min, max, fallback);
+  persistDailyBalance();
+  syncDailyProfileInputs();
+  renderDailyBalanceMetrics();
+}
+
+function normalizeProfileNumber(value, min, max, fallback, integer = false) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return fallback;
+  }
+
+  const safeValue = clamp(parsed, min, max);
+  return integer ? Math.round(safeValue) : safeValue;
+}
+
+function normalizeActivityFactor(value) {
+  const parsed = Number(value);
+  const allowed = [1.2, 1.375, 1.55, 1.725, 1.9];
+  return allowed.find((item) => Math.abs(item - parsed) < 0.001) ?? DEFAULT_DAILY_PROFILE.activity;
+}
+
+function persistDailyBalance() {
+  localStorage.setItem(DAILY_BALANCE_STORAGE_KEY, JSON.stringify(state.dailyBalance));
 }
 
 function setupInstallPrompt() {

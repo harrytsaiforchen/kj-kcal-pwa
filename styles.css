@@ -76,7 +76,8 @@ body::after {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -147,10 +148,13 @@ button {
 .formula,
 .install-title,
 .hero-ticket-kicker,
+.balance-kicker,
 .quick-actions-header p,
 .slider-summary p:first-child,
 .dial-caption,
-.insight-label {
+.insight-label,
+.profile-label,
+.balance-summary-label {
   margin: 0;
   font-size: 0.76rem;
   letter-spacing: 0.16em;
@@ -533,6 +537,199 @@ button {
 .history-panel {
   --panel-stripe: linear-gradient(90deg, #9b5f2c, #d8a06f);
   grid-column: 1 / -1;
+}
+
+.balance-panel {
+  --panel-stripe: linear-gradient(90deg, #b55f1e, #1b8d88);
+  grid-column: 1 / -1;
+}
+
+.balance-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+  gap: 18px;
+}
+
+.balance-column {
+  display: grid;
+  gap: 16px;
+}
+
+.balance-subhead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.balance-subhead h3 {
+  margin: 8px 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 3vw, 1.85rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+
+.balance-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.balance-summary-grid,
+.metabolism-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.balance-summary-card,
+.profile-field,
+.entry-row,
+.deficit-card {
+  border-radius: 24px;
+  border: 1px solid rgba(157, 92, 41, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 246, 236, 0.92)),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.24), transparent 62%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.52);
+}
+
+.balance-summary-card {
+  min-height: 128px;
+  padding: 18px;
+}
+
+.balance-summary-value,
+.deficit-value {
+  display: block;
+  margin: 14px 0 0;
+  font-family: var(--font-display);
+  color: var(--ink);
+  letter-spacing: -0.04em;
+}
+
+.balance-summary-value {
+  font-size: clamp(1.7rem, 4vw, 2.35rem);
+}
+
+.balance-summary-note,
+.balance-note,
+.deficit-note {
+  margin: 8px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.58;
+}
+
+.balance-note {
+  max-width: 20ch;
+  text-align: right;
+}
+
+.entry-list {
+  display: grid;
+  gap: 12px;
+}
+
+.entry-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(118px, 0.78fr) minmax(104px, auto) minmax(110px, auto) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 16px;
+}
+
+.entry-name,
+.entry-energy,
+.entry-unit,
+.profile-input,
+.profile-select {
+  width: 100%;
+  min-width: 0;
+  border-radius: 16px;
+  border: 1px solid rgba(157, 92, 41, 0.12);
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--ink);
+  outline: none;
+}
+
+.entry-name,
+.entry-energy,
+.entry-unit {
+  padding: 12px 14px;
+}
+
+.profile-field {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.metabolism-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.profile-field-wide {
+  grid-column: 1 / -1;
+}
+
+.profile-input,
+.profile-select {
+  padding: 12px 14px;
+}
+
+.profile-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-unit {
+  color: var(--ink-soft);
+  font-size: 0.96rem;
+}
+
+.entry-preview {
+  font-family: var(--font-mono);
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.entry-remove {
+  min-height: 48px;
+}
+
+.deficit-card {
+  padding: 20px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 190, 87, 0.14), transparent 36%),
+    linear-gradient(135deg, rgba(46, 25, 15, 0.95), rgba(111, 53, 17, 0.92));
+}
+
+.deficit-card .balance-kicker,
+.deficit-card .deficit-value,
+.deficit-card .deficit-note {
+  color: rgba(255, 248, 241, 0.96);
+}
+
+.deficit-card.is-positive {
+  background:
+    radial-gradient(circle at top right, rgba(96, 217, 172, 0.18), transparent 36%),
+    linear-gradient(135deg, rgba(18, 82, 77, 0.96), rgba(24, 123, 119, 0.92));
+}
+
+.deficit-card.is-negative {
+  background:
+    radial-gradient(circle at top right, rgba(255, 190, 87, 0.2), transparent 36%),
+    linear-gradient(135deg, rgba(134, 45, 9, 0.97), rgba(218, 86, 13, 0.92));
+}
+
+.deficit-value {
+  font-size: clamp(2.15rem, 5vw, 3rem);
 }
 
 .panel-heading {
@@ -1169,7 +1366,8 @@ button {
 
 @media (max-width: 1060px) {
   .hero-grid,
-  .content-grid {
+  .content-grid,
+  .balance-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1203,6 +1401,7 @@ button {
   .hero-ticket-head,
   .install-banner,
   .panel-heading,
+  .balance-subhead,
   .slider-summary,
   .quick-actions-header {
     flex-direction: column;
@@ -1244,8 +1443,29 @@ button {
   .insight-strip,
   .history-list,
   .spectrum-legend,
-  .nutrition-primary-grid {
+  .nutrition-primary-grid,
+  .balance-summary-grid,
+  .metabolism-summary-grid,
+  .metabolism-form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .profile-field-wide {
+    grid-column: auto;
+  }
+
+  .entry-row {
+    grid-template-columns: 1fr;
+  }
+
+  .entry-preview,
+  .balance-note {
+    text-align: left;
+  }
+
+  .entry-remove,
+  .balance-actions .ghost-button {
+    width: 100%;
   }
 
   .nutrition-sheet-head,
@@ -1279,6 +1499,13 @@ button {
 
   .value-input {
     font-size: clamp(2.05rem, 11vw, 2.8rem);
+  }
+
+  .balance-summary-card,
+  .profile-field,
+  .entry-row,
+  .deficit-card {
+    padding: 16px;
   }
 }
 
